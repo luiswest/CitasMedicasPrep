@@ -18,7 +18,9 @@ $app->get('/hello/{name}', function (Request $request, Response $response, array
 
 $app->group('/api', function(RouteCollectorProxy $api) {
     $api->group('/medico', function(RouteCollectorProxy $endpoint) {
-        $endpoint->get('', Medico::class . ':read');
+        $endpoint->get('[/{id}]', Medico::class . ':read');
         $endpoint->post('', Medico::class . ':create');
+        $endpoint->put('/{id}', Medico::class . ':update');
+        $endpoint->delete('/{id}', Medico::class . ':delete');
     });
 });

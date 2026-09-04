@@ -17,12 +17,12 @@ CREATE TABLE usuarios (
 
 CREATE TABLE pacientes (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    -- usuario_id INT, -- Vinculado para login
+    usuario_id INT NOT NULL, -- Vinculado para login
     cedula VARCHAR(20) NOT NULL UNIQUE,
     nombre_completo VARCHAR(150) NOT NULL,
     fecha_nacimiento DATE NOT NULL,    
-    telefono VARCHAR(20)
-    -- FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+    telefono VARCHAR(20),
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
 
 CREATE TABLE especialidades (
@@ -37,7 +37,7 @@ CREATE TABLE medicos (
     nombre_completo VARCHAR(150) NOT NULL,
     licencia VARCHAR(50) NOT NULL UNIQUE,
     telefono VARCHAR(20),
-    FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
     FOREIGN KEY (especialidad_id) REFERENCES especialidades(id)
 );
 
@@ -45,7 +45,7 @@ CREATE TABLE administradores (
     id INT AUTO_INCREMENT PRIMARY KEY,
     usuario_id INT, -- Vinculado para login
     nombre_completo VARCHAR(150) NOT NULL,
-    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
 
 CREATE TABLE citas (
@@ -109,6 +109,7 @@ insert into roles (nombre) values ('Administrador');
 insert into roles (nombre) values ('Médico');
 insert into roles (nombre) values ('Paciente');
 
+insert into especialidades (nombre) values ('Medicina General');
 insert into especialidades (nombre) values ('Cardiología');
 insert into especialidades (nombre) values ('Dermatología');
 insert into especialidades (nombre) values ('Pediatría');
