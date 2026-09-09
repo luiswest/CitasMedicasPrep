@@ -1,8 +1,8 @@
 @host = http://localhost:8080/api
-@uri = {{host}}/medico
+@uri = {{host}}/paciente
 #@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJsb2NhbGhvc3QiLCJpYXQiOjE3Nzg0MzE2NjQsImV4cCI6MTc3ODQzMzQ2NCwic3ViIjoiNy0xMjM0LTU2NzgiLCJyb2wiOjMsIm5vbSI6Ikx1aXMgV2VzdCJ9.kPq1MSyAXEKDX9hfJRc_9SmJqexUI08fBDolaQfwH7E
 
-GET {{uri}}/4
+GET {{uri}}
 #Authorization: Bearer {{token}}
 ###
 
@@ -11,36 +11,34 @@ POST {{uri}}
 Content-Type: application/json
 
  {
-    "especialidad_id": 1,
-    "nombre_completo": "Armando West Grant",
-    "licencia": "LIC-123415",
+    "cedula": "123456781",
+    "nombre_completo": "Luis West Grant",
+    "fecha_nacimiento": "1990-01-01",
     "telefono": "8888-7771",
-    "username": "armandowest",
+    "username": "luiswest1",
     "password": "securepassword"
   }
 ###
 
-PUT {{uri}}/3
+PUT {{uri}}/4
 #Authorization: Bearer {{token}}
 Content-Type: application/json
 
  {
-    "especialidad_id": 3,
-    "nombre_completo": "Armando West Grant",
-    "licencia": "LIC-123415",
-    "telefono": "8888-7771",
-    "username": "luiswest",
-    "password": "securepassword"
+    "nombre_completo": "Luis Armando West Grant",
+    "fecha_nacimiento": "1990-01-01",
+    "telefono": "8888-7771"
+
   }
 ###
-DELETE {{uri}}/1
+DELETE {{uri}}/4
 #Authorization: Bearer {{token}}
 ###
 GET {{uri}}/filter/0/10?cedula=&nombre=
 Authorization: Bearer {{token}} 
 ###
 
-GET {{uri}}/filter/0/10?especialidad=Medicina&nombre=Armando
+GET {{uri}}/filter/0/10
 ###
 
 POST {{host}}/cita

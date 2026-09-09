@@ -1,13 +1,13 @@
 <?php
 namespace App\controllers;
-use App\Models\Medico as MedicoModel;
+use App\Models\Paciente as PacienteModel;
 use App\Models\User;
 use Illuminate\Database\QueryException;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Container\ContainerInterface;
 
-class Medico {
+class Paciente {
     private ContainerInterface $container;
 
     public function __construct(ContainerInterface $c) {
@@ -17,22 +17,21 @@ class Medico {
     public function read(Request $request, Response $response, array $args): Response {
         $this->container->get('eloquent');
         if (isset($args['id'])) {
-            $medico = MedicoModel::query()
-                ->select(['medicos.id', 'especialidad_id', 'especialidades.nombre as especialidad_nombre', 'nombre_completo', 'licencia', 'telefono'])
-                ->join('especialidades', 'medicos.especialidad_id', '=', 'especialidades.id')
+            $paciente = PacienteModel::query()
+                ->select(['id', 'cedula', 'nombre_completo', 'fecha_nacimiento', 'telefono'])
                 ->find($args['id']);
-            if ($medico === null) {
-                return $this->json($response, ['error' => 'Médico no encontrado.'], 404);
+            if ($paciente === null) {
+                return $this->json($response, ['error' => 'Paciente no encontrado.'], 404);
             }
 
-            return $this->json($response, ['data' => $medico->toArray()], 200);
+            return $this->json($response, ['data' => $paciente->toArray()], 200);
         }
 
-        $medicos = MedicoModel::query()
-            ->select(['id', 'especialidad_id', 'nombre_completo', 'licencia', 'telefono'])
+        $pacientes = PacienteModel::query()
+            ->select(['id', 'cedula', 'nombre_completo', 'fecha_nacimiento', 'telefono'])
             ->get()
             ->toArray();
-        return $this->json($response, ['data' => $medicos], 200);
+        return $this->json($response, ['data' => $pacientes], 200);
     }
 
     public function filter(Request $request, Response $response, array $args): Response {
@@ -48,49 +47,34 @@ class Medico {
 
         $params = $request->getQueryParams();
         //Operador de coalescencia nula (??) para proporcionar valores predeterminados si los parámetros no están presentes
+        $cedula = trim((string) ($params['cedula'] ?? ''));
         $name = trim((string) ($params['nombre'] ?? $params['nombre_completo'] ?? ''));
-        $license = trim((string) ($params['cedula'] ?? $params['licencia'] ?? ''));
-        $specialty = trim((string) ($params['especialidad'] ?? ''));
-        $specialtyId = $params['especialidad_id'] ?? null;
 
-        $query = MedicoModel::query()
+        $query = PacienteModel::query()
             ->select([
-                'medicos.id',
-                'medicos.especialidad_id',
-                'especialidades.nombre as especialidad_nombre',
-                'medicos.nombre_completo',
-                'medicos.licencia',
-                'medicos.telefono',
-            ])
-            ->join('especialidades', 'medicos.especialidad_id', '=', 'especialidades.id');
-
+                'pacientes.id',
+                'pacientes.cedula',
+                'pacientes.nombre_completo',
+                'pacientes.fecha_nacimiento',
+                'pacientes.telefono',
+            ]);
         if ($name !== '') {
-            $query->where('medicos.nombre_completo', 'like', "%{$name}%");
+            $query->where('pacientes.nombre_completo', 'like', "%{$name}%");
         }
-        if ($license !== '') {
-            $query->where('medicos.licencia', 'like', "%{$license}%");
-        }
-        if ($specialty !== '') {
-            $query->where('especialidades.nombre', 'like', "%{$specialty}%");
-        }
-        if ($specialtyId !== null && $specialtyId !== '') {
-            $specialtyId = filter_var($specialtyId, FILTER_VALIDATE_INT);
-            if ($specialtyId === false || $specialtyId < 1) {
-                return $this->json($response, ['error' => 'especialidad_id debe ser un entero positivo.'], 422);
-            }
-            $query->where('medicos.especialidad_id', $specialtyId);
+        if ($cedula !== '') {
+            $query->where('pacientes.cedula', 'like', "%{$cedula}%");
         }
 
-        $total = (clone $query)->count('medicos.id');
-        $medicos = $query
-            ->orderBy('medicos.nombre_completo')
+        $total = (clone $query)->count('pacientes.id');
+        $pacientes = $query
+            ->orderBy('pacientes.nombre_completo')
             ->offset($offset)
             ->limit($limit)
             ->get()
             ->toArray();
 
         return $this->json($response, [
-            'data' => $medicos,
+            'data' => $pacientes,
             'pagination' => [
                 'offset' => $offset,
                 'limit' => $limit,
@@ -104,22 +88,25 @@ class Medico {
         $data = is_array($data) ? $data : [];
 
         $errors = [];
-        $specialtyId = filter_var($data['especialidad_id'] ?? null, FILTER_VALIDATE_INT);
+        $cedula  = trim((string) ($data['cedula'] ?? ''));
         $fullName = trim((string) ($data['nombre_completo'] ?? ''));
-        $license = trim((string) ($data['licencia'] ?? ''));
+        $birth_date = trim((string) ($data['fecha_nacimiento'] ?? ''));
         $phone = isset($data['telefono']) ? trim((string) $data['telefono']) : null;
+        
         $username = trim((string) ($data['username'] ?? ''));
         $password = (string) ($data['password'] ?? '');
+        
 
-        if ($specialtyId === false || $specialtyId === null || $specialtyId < 1) {
-            $errors['especialidad_id'] = 'Debe ser un entero positivo.';
+        if ($cedula === '' || mb_strlen($cedula) > 20) {
+            $errors['cedula'] = 'Es obligatoria y debe tener máximo 20 caracteres.';
         }
         if ($fullName === '' || mb_strlen($fullName) > 150) {
             $errors['nombre_completo'] = 'Es obligatorio y debe tener máximo 150 caracteres.';
         }
-        if ($license === '' || mb_strlen($license) > 50) {
-            $errors['licencia'] = 'Es obligatoria y debe tener máximo 50 caracteres.';
+        if ($birth_date === '' || !strtotime($birth_date)) {
+            $errors['fecha_nacimiento'] = 'Es obligatoria y debe ser una fecha válida.';
         }
+
         if ($username === '' || mb_strlen($username) > 50) {
             $errors['username'] = 'Es obligatorio y debe tener máximo 50 caracteres.';
         }
@@ -137,15 +124,15 @@ class Medico {
         }
         try {
             $eloquent = $this->container->get('eloquent');
-            $medico = $eloquent->connection()->transaction(
-                static function () use ($specialtyId, $fullName, $license, $phone, $username, $password): MedicoModel {
+            $paciente = $eloquent->connection()->transaction(
+                static function () use ($cedula, $fullName, $birth_date, $phone, $username, $password): PacienteModel {
                     $roleId = User::query()
                         ->from('roles')
-                        ->where('nombre', 'Médico')
+                        ->where('nombre', 'Paciente')
                         ->value('id');
 
                     if ($roleId === null) {
-                        throw new RuntimeException('El rol Médico no está configurado.');
+                        throw new RuntimeException('El rol Paciente no está configurado.');
                     }
                     $user = User::create([
                         'username' => $username,
@@ -153,11 +140,11 @@ class Medico {
                         'rol_id' => $roleId,
                         'activo' => true,
                     ]);
-                    return MedicoModel::create([
+                    return PacienteModel::create([
                         'usuario_id' => $user->id,
-                        'especialidad_id' => $specialtyId,
+                        'cedula' => $cedula,
                         'nombre_completo' => $fullName,
-                        'licencia' => $license,
+                        'fecha_nacimiento' => $birth_date,
                         'telefono' => $phone,
                     ]);
                 }
@@ -169,21 +156,21 @@ class Medico {
                 if (str_contains($message, 'username')) {
                     return $this->json($response, ['error' => 'El nombre de usuario ya está registrado.'], 409);
                 }
-                return $this->json($response, ['error' => 'La licencia ya está registrada.'], 409);
+                return $this->json($response, ['error' => 'La cédula ya está registrada.'], 409);
             }
             throw $exception;
         }
-        return $this->json($response, ['data' => $medico->toArray()], 201);
+        return $this->json($response, ['data' => $paciente->toArray()], 201);
     }
 
     public function update(Request $request, Response $response, array $args): Response {
-        // Implementation for updating a Medico record would go here.
+        // Implementation for updating a Paciente record would go here.
         $eloquent = $this->container->get('eloquent');
         if (isset($args['id'])) {
-            $medico = MedicoModel::find($args['id']);
+            $paciente = PacienteModel::find($args['id']);
 
-            if ($medico === null) {
-                return $this->json($response, ['error' => 'Médico no encontrado.'], 404);
+            if ($paciente === null) {
+                return $this->json($response, ['error' => 'Paciente no encontrado.'], 404);
             }
 
             $data = $request->getParsedBody();
@@ -194,39 +181,39 @@ class Medico {
                 if ($fullName === '' || mb_strlen($fullName) > 150) {
                     return $this->json($response, ['error' => 'Nombre completo inválido.'], 422);
                 }
-                $medico->nombre_completo = $fullName;
+                $paciente->nombre_completo = $fullName;
             }
 
-            $medico->save();
+            $paciente->save();
 
-            return $this->json($response, ['data' => $medico->toArray()], 200);
+            return $this->json($response, ['data' => $paciente->toArray()], 200);
         }
     }
     public function delete(Request $request, Response $response, array $args): Response {
         
         $eloquent = $this->container->get('eloquent');
         if (isset($args['id'])) {
-            $medico = MedicoModel::find($args['id']);
+            $paciente = PacienteModel::find($args['id']);
 
-            if ($medico === null) {
-                return $this->json($response, ['error' => 'Médico no encontrado.'], 404);
+            if ($paciente === null) {
+                return $this->json($response, ['error' => 'Paciente no encontrado.'], 404);
             }
 
-            // Verificar si el médico tiene citas asignadas
+            // Verificar si el paciente tiene citas asignadas
             $citasCount = $eloquent->table('citas')
-                ->where('medico_id', $medico->id)
+                ->where('paciente_id', $paciente->id)
                 ->count();
 
             if ($citasCount > 0) {
-                return $this->json($response, ['error' => 'No se puede eliminar el médico porque tiene citas asignadas.'], 409);
+                return $this->json($response, ['error' => 'No se puede eliminar el paciente porque tiene citas asignadas.'], 409);
             }
 
-            $eloquent->connection()->transaction(static function () use ($medico): void {
-                // Obtener el ID del usuario asociado antes de eliminar el médico
-                $usuarioId = $medico->usuario_id;
+            $eloquent->connection()->transaction(static function () use ($paciente): void {
+                // Obtener el ID del usuario asociado antes de eliminar el paciente
+                $usuarioId = $paciente->usuario_id;
                 
-                // Eliminar el médico
-                $medico->delete();
+                // Eliminar el paciente
+                $paciente->delete();
                 
                 // Eliminar el usuario relacionado
                 if ($usuarioId !== null) {
@@ -237,7 +224,7 @@ class Medico {
                 }
             });
 
-            return $this->json($response, ['message' => 'Médico y usuario eliminados exitosamente.'], 200);
+            return $this->json($response, ['message' => 'Paciente y usuario eliminados exitosamente.'], 200);
         }
     }
     private function json(Response $response, array $payload, int $status): Response {
