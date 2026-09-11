@@ -1,4 +1,4 @@
-FROM php:8.4.19-apache
+FROM php:8.5-apache
 WORKDIR /var/www/html 
 
 RUN a2enmod rewrite
