@@ -1,0 +1,54 @@
+@host = http://localhost:9090/api
+@uri = {{host}}/medicos
+#@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJsb2NhbGhvc3QiLCJpYXQiOjE3Nzg0MzE2NjQsImV4cCI6MTc3ODQzMzQ2NCwic3ViIjoiNy0xMjM0LTU2NzgiLCJyb2wiOjMsIm5vbSI6Ikx1aXMgV2VzdCJ9.kPq1MSyAXEKDX9hfJRc_9SmJqexUI08fBDolaQfwH7E
+
+GET {{uri}}
+#Authorization: Bearer {{token}}
+###
+
+POST {{uri}}
+#Authorization: Bearer {{token}}
+Content-Type: application/json
+
+ {
+    "especialidad_id": 1,
+    "nombre_completo": "Jaz West Grant",
+    "licencia": "LIC-123446",
+    "telefono": "8888-7771",
+    "username": "jazwest",
+    "password": "securepassword"
+  }
+###
+
+PUT {{uri}}/3
+#Authorization: Bearer {{token}}
+Content-Type: application/json
+
+ {
+    "especialidad_id": 3,
+    "nombre_completo": "Armando West Grant",
+    "licencia": "LIC-123415",
+    "telefono": "8888-7771",
+    "username": "luiswest",
+    "password": "securepassword"
+  }
+###
+DELETE {{uri}}/1
+#Authorization: Bearer {{token}}
+###
+GET {{uri}}/filter/0/10?cedula=&nombre=
+Authorization: Bearer {{token}} 
+###
+
+GET {{uri}}/filter/0/10?especialidad=Medicina&nombre=Armando
+###
+
+POST {{host}}/cita
+Content-Type: application/json
+
+{
+  "paciente_id": 1,
+  "medico_id": 1,
+  "fecha_hora": "2026-09-10 10:30:00",
+  "motivo": "Consulta general"
+}

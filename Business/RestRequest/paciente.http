@@ -1,0 +1,52 @@
+@host = http://localhost:8080/api
+@uri = {{host}}/paciente
+#@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJsb2NhbGhvc3QiLCJpYXQiOjE3Nzg0MzE2NjQsImV4cCI6MTc3ODQzMzQ2NCwic3ViIjoiNy0xMjM0LTU2NzgiLCJyb2wiOjMsIm5vbSI6Ikx1aXMgV2VzdCJ9.kPq1MSyAXEKDX9hfJRc_9SmJqexUI08fBDolaQfwH7E
+
+GET {{uri}}
+#Authorization: Bearer {{token}}
+###
+
+POST {{uri}}
+#Authorization: Bearer {{token}}
+Content-Type: application/json
+
+ {
+    "cedula": "123456781",
+    "nombre_completo": "Luis West Grant",
+    "fecha_nacimiento": "1990-01-01",
+    "telefono": "8888-7771",
+    "username": "luiswest1",
+    "password": "securepassword"
+  }
+###
+
+PUT {{uri}}/4
+#Authorization: Bearer {{token}}
+Content-Type: application/json
+
+ {
+    "nombre_completo": "Luis Armando West Grant",
+    "fecha_nacimiento": "1990-01-01",
+    "telefono": "8888-7771"
+
+  }
+###
+DELETE {{uri}}/4
+#Authorization: Bearer {{token}}
+###
+GET {{uri}}/filter/0/10?cedula=&nombre=
+Authorization: Bearer {{token}} 
+###
+
+GET {{uri}}/filter/0/10
+###
+
+POST {{host}}/cita
+Content-Type: application/json
+
+{
+  "paciente_id": 1,
+  "medico_id": 1,
+  "fecha_hora": "2026-09-10 10:30:00",
+  "motivo": "Consulta general"
+}

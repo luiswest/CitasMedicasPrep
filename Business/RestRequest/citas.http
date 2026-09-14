@@ -1,0 +1,17 @@
+@host = http://localhost:9090/api
+@uri = {{host}}/cita
+#@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJsb2NhbGhvc3QiLCJpYXQiOjE3Nzg0MzE2NjQsImV4cCI6MTc3ODQzMzQ2NCwic3ViIjoiNy0xMjM0LTU2NzgiLCJyb2wiOjMsIm5vbSI6Ikx1aXMgV2VzdCJ9.kPq1MSyAXEKDX9hfJRc_9SmJqexUI08fBDolaQfwH7E
+
+POST {{uri}}
+Content-Type: application/json
+
+{
+  "paciente_id": 1,
+  "medico_id": 4,
+  "fecha_hora": "2026-09-10 10:30:00",
+  "motivo": "Consulta general"
+}
+###
+
+GET {{uri}}/paciente/1
+###

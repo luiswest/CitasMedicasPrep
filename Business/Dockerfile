@@ -13,7 +13,9 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" &&
  mv composer.phar /usr/local/bin/composer
 
 COPY ./Business/composer.json .
+COPY ./Business/composer.lock .
 COPY ./Business/.env .
+#COPY ./Business/docs ./docs
 
 RUN apt-get update && apt-get install -y zip
 RUN apt-get update && apt-get install -y git

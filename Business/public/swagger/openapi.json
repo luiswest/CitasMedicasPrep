@@ -1,0 +1,211 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Citas Médicas Negocio API",
+    "version": "1.0.0",
+    "description": "Definición de OpenAPI para la API Slim de Negocio.",
+    "contact": {
+      "name": "Citas Médicas",
+      "email": "luis.west@ucr.ac.cr"
+    }
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Servidor del Api en desarrollo"
+    },
+    {
+      "url": "https://api.citasmedicas.ucr.ac.cr/",
+      "description": "Servidor del Api en Producción"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "medico": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "Medico payload es enviado al servicio a la capa de datos."
+      },
+      "paciente": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "Paciente payload es enviado al servicio a la capa de datos."
+      }
+    }
+  },
+
+  "tags": [
+    { "name": "Medicos", "description": "Operaciones relacionados a médicos" },
+    { "name": "Pacientes", "description": "Operaciones relacionados a pacientes" }
+  ],
+  "paths": {
+    "/api/medicos": {
+      "get": {
+        "summary": "Lista de médicos",
+        "tags": ["Medicos"],
+        "description": "Returna todos los médicos.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": { "type": ["array", "object"] }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create medico",
+        "tags": ["Medicos"],
+        "requestBody": {
+          "description": "Medico object to create",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/medico" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created medico",
+            "content": { "application/json": { "schema": { "type": ["array", "object"] } } }
+          }
+        }
+      }
+    },
+    "/api/medicos/{id}": {
+      "get": {
+        "summary": "Obtener médico por ID",
+        "tags": ["Medicos"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Medico found", "content": { "application/json": { "schema": { "type": "object" } } } },
+          "404": { "description": "Medico not found" }
+        }
+      },
+      "put": {
+        "summary": "Update medico",
+        "tags": ["Medicos"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "description": "Medico object to update",
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/medico" } } }
+        },
+        "responses": {
+          "200": { "description": "Medico updated" }
+        }
+      },
+      "delete": {
+        "summary": "Delete medico",
+        "tags": ["Medicos"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": { "204": { "description": "Medico deleted" } }
+      }
+    },
+    "/api/medicos/filter/{pag}/{lim}": {
+      "get": {
+        "summary": "Filter medicos",
+        "tags": ["Medicos"],
+        "parameters": [
+          { "name": "pag", "in": "path", "required": true, "description": "Desplazamiento inicial de resultados.", "schema": { "type": "integer", "minimum": 0, "default": 0 } },
+          { "name": "lim", "in": "path", "required": true, "description": "Cantidad máxima de resultados.", "schema": { "type": "integer", "minimum": 1, "maximum": 100, "default": 20 } },
+          { "name": "nombre", "in": "query", "required": false, "description": "Filtra por nombre completo.", "schema": { "type": "string" } },
+          { "name": "cedula", "in": "query", "required": false, "description": "Filtra por licencia o cédula del médico.", "schema": { "type": "string" } },
+          { "name": "especialidad", "in": "query", "required": false, "description": "Filtra por nombre de especialidad.", "schema": { "type": "string" } },
+          { "name": "especialidad_id", "in": "query", "required": false, "description": "Filtra por identificador de especialidad.", "schema": { "type": "integer", "minimum": 1 } }
+        ],
+        "responses": {
+          "200": { "description": "Filtered medico list", "content": { "application/json": { "schema": { "type": ["array", "object"] } } } }
+        }
+      }
+    },
+    "/api/pacientes": {
+      "get": {
+        "summary": "List pacientes",
+        "tags": ["Paciente"],
+        "responses": {
+          "200": { 
+            "description": "Successful response", 
+            "content": { 
+              "application/json": { 
+                "schema": { 
+                  "type": ["array", "object"] 
+                } 
+              } 
+            } 
+          }
+        }
+      },
+      "post": {
+        "summary": "Create paciente",
+        "tags": ["Paciente"],
+        "requestBody": {
+          "description": "Paciente object to create",
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/paciente" } } }
+        },
+        "responses": {
+          "200": { "description": "Created paciente" }
+        }
+      }
+    },
+    "/api/pacientes/{id}": {
+      "get": {
+        "summary": "Get paciente by ID",
+        "tags": ["Paciente"],   
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Paciente found", "content": { "application/json": { "schema": { "type": "object" } } } },
+          "404": { "description": "Paciente not found" }
+        }
+      },
+      "put": {
+        "summary": "Update paciente",
+        "tags": ["Paciente"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "description": "Paciente object to update",
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/paciente" } } }
+        },
+        "responses": { "200": { "description": "Paciente updated" } }
+      },
+      "delete": {
+        "summary": "Delete paciente",
+        "tags": ["Paciente"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": { "204": { "description": "Paciente deleted" } }
+      }
+    },
+    "/api/pacientes/filter/{pag}/{lim}": {
+      "get": {
+        "summary": "Filter pacientes",
+        "tags": ["Paciente"],
+        "parameters": [
+          { "name": "pag", "in": "path", "required": true, "description": "Desplazamiento inicial de resultados.", "schema": { "type": "integer", "minimum": 0, "default": 0 } },
+          { "name": "lim", "in": "path", "required": true, "description": "Cantidad máxima de resultados.", "schema": { "type": "integer", "minimum": 1, "maximum": 100, "default": 20 } },
+          { "name": "nombre", "in": "query", "required": false, "description": "Filtra por nombre completo.", "schema": { "type": "string" } },
+          { "name": "cedula", "in": "query", "required": false, "description": "Filtra por número de cédula.", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Filtered paciente list", "content": { "application/json": { "schema": { "type": ["array", "object"] } } } }
+        }
+      }
+    }
+  }
+}

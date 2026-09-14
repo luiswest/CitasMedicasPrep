@@ -1,0 +1,335 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Negocio API",
+    "version": "1.0.0",
+    "description": "Definición de OpenAPI para la API Slim de Negocio.",
+    "contact": {
+      "name": "Citas Médicas",
+      "email": "support@example.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Servidor del Api en desarrollo"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "medico": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "Medico payload forwarded to the backend service."
+      },
+      "paciente": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "Paciente payload forwarded to the backend service."
+      },
+      "login": {
+        "type": "object",
+        "properties": {
+          "cedula": { "type": "string", "example": "12345678" },
+          "passw": { "type": "string", "example": "password123" }
+        },
+        "required": ["cedula", "passw"]
+      },
+      "changePassword": {
+        "type": "object",
+        "properties": {
+          "passw": { "type": "string", "example": "oldPassword" },
+          "passwN": { "type": "string", "example": "newPassword" }
+        },
+        "required": ["passw", "passwN"]
+      },
+      "changeRole": {
+        "type": "object",
+        "properties": {
+          "rol": { "type": "string", "example": "admin" }
+        },
+        "required": ["rol"]
+      },
+      "tokenResponse": {
+        "type": "object",
+        "properties": {
+          "access_token": { "type": "string" },
+          "refresh_token": { "type": "string" },
+          "token_type": { "type": "string", "example": "Bearer" },
+          "expires_in": { "type": "integer", "example": 3600 }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "BearerAuth": []
+    }
+  ],
+  "tags": [
+    { "name": "Medicos", "description": "Operations related to médicos" },
+    { "name": "Pacientes", "description": "Operations related to pacientes" },
+    { "name": "Auth", "description": "Authentication and user management operations" },
+    { "name": "Usuario", "description": "Operations related to usuarios" }
+  ],
+  "paths": {
+    "/api/medicos": {
+      
+      "get": {
+        "summary": "List médicos",
+        "tags": ["Medicos"],
+        "description": "Returns all médicos or a filtered list.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": { "type": ["array", "object"] }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create medico",
+        "tags": ["Medicos"],
+        "requestBody": {
+          "description": "Medico object to create",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/medico" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created medico",
+            "content": { "application/json": { "schema": { "type": ["array", "object"] } } }
+          }
+        }
+      }
+    },
+    "/api/medicos/{id}": {
+      "get": {
+        "summary": "Get medico by ID",
+        "tags": ["Medicos"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Medico found", "content": { "application/json": { "schema": { "type": "object" } } } },
+          "404": { "description": "Medico not found" }
+        }
+      },
+      "put": {
+        "summary": "Update medico",
+        "tags": ["Medicos"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "description": "Medico object to update",
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/medico" } } }
+        },
+        "responses": {
+          "200": { "description": "Medico updated" }
+        }
+      },
+      "delete": {
+        "summary": "Delete medico",
+        "tags": ["Medicos"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": { "204": { "description": "Medico deleted" } }
+      }
+    },
+    "/api/medicos/filter/{pag}/{lim}": {
+      "get": {
+        "summary": "Filter medicos",
+        "tags": ["Medicos"],
+        "parameters": [
+          { "name": "pag", "in": "path", "required": true, "schema": { "type": "integer" } },
+          { "name": "lim", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Filtered medico list", "content": { "application/json": { "schema": { "type": ["array", "object"] } } } }
+        }
+      }
+    },
+    "/api/pacientes": {
+      "get": {
+        "summary": "List pacientes",
+        "tags": ["Paciente"],
+        "responses": {
+          "200": { "description": "Successful response", "content": { "application/json": { "schema": { "type": ["array", "object"] } } } }
+        }
+      },
+      "post": {
+        "summary": "Create paciente",
+        "tags": ["Paciente"],
+        "requestBody": {
+          "description": "Paciente object to create",
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/paciente" } } }
+        },
+        "responses": {
+          "200": { "description": "Created paciente" }
+        }
+      }
+    },
+    "/api/pacientes/{id}": {
+      "get": {
+        "summary": "Get paciente by ID",
+        "tags": ["Paciente"],   
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Paciente found", "content": { "application/json": { "schema": { "type": "object" } } } },
+          "404": { "description": "Paciente not found" }
+        }
+      },
+      "put": {
+        "summary": "Update paciente",
+        "tags": ["Paciente"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "description": "Paciente object to update",
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/paciente" } } }
+        },
+        "responses": { "200": { "description": "Paciente updated" } }
+      },
+      "delete": {
+        "summary": "Delete paciente",
+        "tags": ["Paciente"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": { "204": { "description": "Paciente deleted" } }
+      }
+    },
+    "/api/pacientes/filter/{pag}/{lim}": {
+      "get": {
+        "summary": "Filter pacientes",
+        "tags": ["Paciente"],
+        "parameters": [
+          { "name": "pag", "in": "path", "required": true, "schema": { "type": "integer" } },
+          { "name": "lim", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Filtered paciente list", "content": { "application/json": { "schema": { "type": ["array", "object"] } } } }
+        }
+      }
+    },
+    "/api/auth": {
+      "patch": {
+        "summary": "Login",
+        "tags": ["Auth"],
+        "description": "Authenticate and receive a JWT token.",
+        "security": [],
+        "requestBody": {
+          "description": "Login credentials",
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/login" } } }
+        },
+        "responses": {
+          "200": { "description": "Authentication successful", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/tokenResponse" } } } },
+          "401": { "description": "Invalid credentials" }
+        }
+      }
+    },
+    "/api/auth/logout/{id}": {
+      "patch": {
+        "summary": "Logout user",
+        "tags": ["Auth"],
+        "security": [],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Logout successful" },
+          "401": { "description": "Logout failed" }
+        }
+      }
+    },
+    "/api/usuario/passw/{id}": {
+      "patch": {
+        "summary": "Change user password",
+        "tags": ["Usuario"],
+        "security": [],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "description": "Old and new password values",
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/changePassword" } } }
+        },
+        "responses": {
+          "200": { "description": "Password changed" },
+          "401": { "description": "Authentication failed" }
+        }
+      }
+    },
+    "/api/usuario/passw/reset/{id}": {
+      "patch": {
+        "summary": "Reset user password",
+        "tags": ["Usuario"],
+        "security": [],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Password reset" },
+          "401": { "description": "Request failed" }
+        }
+      }
+    },
+    "/api/usuario/rol/{id}": {
+      "patch": {
+        "summary": "Change user role",
+        "tags": ["Usuario"],
+        "security": [],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "description": "New user role",
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/changeRole" } } }
+        },
+        "responses": {
+          "200": { "description": "Role changed" },
+          "401": { "description": "Request failed" }
+        }
+      }
+    },
+    "/api/usuario/buscar/{id}": {
+      "get": {
+        "summary": "Find user by ID",
+        "tags": ["Usuario"],
+        "security": [],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "User found", "content": { "application/json": { "schema": { "type": "object" } } } },
+          "404": { "description": "User not found" }
+        }
+      }
+    }
+  }
+}
