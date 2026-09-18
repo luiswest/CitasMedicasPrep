@@ -38,4 +38,23 @@ final class DataService
             ],
         ]);
     }
+    public function put(string $path, string $body): ResponseInterface
+    {
+        return $this->client->request('PUT', ltrim($path, '/'), [
+            'body' => $body,
+            'headers' => [
+                'Content-Type' => 'application/json',
+            ],
+        ]);
+    }
+    public function delete(string $path): ResponseInterface
+    {
+        return $this->client->request('DELETE', ltrim($path, '/'));
+    }
+    public function filter(string $path, array $query = []): ResponseInterface
+    {
+        return $this->client->request('GET', ltrim($path, '/'), [
+            'query' => $query,
+        ]);
+    }
 }

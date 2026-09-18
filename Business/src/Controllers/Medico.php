@@ -1,5 +1,6 @@
 <?php
 namespace App\Controllers;
+use App\Validators\MedicoValidator;
 use App\Services\DataService;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
@@ -47,9 +48,20 @@ class Medico {
 
     public function create(Request $request, Response $response, array $args): Response {
         try {
+            $request->getBody()->rewind();
+            $body = (string) $request->getBody();
+            $data = json_decode($body, true);
+            if (!is_array($data) || json_last_error() !== JSON_ERROR_NONE) {
+                return $this->json($response, ['errors' => ['body' => 'Debe enviar un objeto JSON válido.']], 422);
+            }
+
+            $errors = (new MedicoValidator())->validate($data);
+            if ($errors !== []) {
+                return $this->json($response, ['errors' => $errors], 422);
+            }
+
             $dataService = $this->container->get(DataService::class);
-            // $body = (string) $request->getBody();
-            $upstream = $dataService->post('medicos', (string) $request->getBody());
+            $upstream = $dataService->post('medicos', json_encode($data, JSON_THROW_ON_ERROR));
             return $this->json($response, json_decode((string) $upstream->getBody(), true), $upstream->getStatusCode());
 
     
@@ -62,7 +74,18 @@ class Medico {
     public function update(Request $request, Response $response, array $args): Response {
         try {
             $dataService = $this->container->get(DataService::class);
+            $request->getBody()->rewind();
             $body = (string) $request->getBody();
+            $data = json_decode($body, true);
+            if (!is_array($data) || json_last_error() !== JSON_ERROR_NONE) {
+                return $this->json($response, ['errors' => ['body' => 'Debe enviar un objeto JSON válido.']], 422);
+            }
+
+            $errors = (new MedicoValidator())->validate($data);
+            if ($errors !== []) {
+                return $this->json($response, ['errors' => $errors], 422);
+            }
+
             $upstream = $dataService->put('medicos/' . rawurlencode($args['id']), $body);
             return $this->json($response, json_decode((string) $upstream->getBody(), true), $upstream->getStatusCode());
         } catch (ConnectException) {
@@ -71,6 +94,18 @@ class Medico {
             return $this->json($response, ['error' => 'No se pudo consultar el servicio de datos.'], 502);
         }
     }
+    public function delete(Request $request, Response $response, array $args): Response {
+        try {
+            $dataService = $this->container->get(DataService::class);
+            $upstream = $dataService->delete('medicos/' . rawurlencode($args['id']));
+            return $this->json($response, json_decode((string) $upstream->getBody(), true), $upstream->getStatusCode());
+        } catch (ConnectException) {
+            return $this->json($response, ['error' => 'El servicio de datos no está disponible.'], 502);
+        } catch (RequestException) {
+            return $this->json($response, ['error' => 'No se pudo consultar el servicio de datos.'], 502);
+        }
+    }
+
     private function json(Response $response, array $payload, int $status): Response {
         $response->getBody()->write(json_encode(
             $payload,
